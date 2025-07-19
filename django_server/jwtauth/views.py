@@ -89,7 +89,7 @@ class UserListView(APIView):
         perPage = int(request.query_params.get('perPage', 10))
         offset = (page - 1) * perPage
 
-        users = CustomUser.objects.exclude(userId=request.user.userId).order_by('-updatedAt')
+        users = CustomUser.objects.exclude(userId=request.user.userId).filter(is_superuser=False).order_by('-updatedAt')
         total = users.count()
         paginated = users[offset:offset+perPage]
         serializer = UserListSerializer(paginated, many=True)

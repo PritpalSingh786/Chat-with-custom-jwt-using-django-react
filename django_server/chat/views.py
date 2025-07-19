@@ -4,7 +4,7 @@ from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import Message
-from jwtauth.models import CustomUser
+# from jwtauth.models import CustomUser
 
 class MessageListView(APIView):
     def get(self, request, user1, user2):

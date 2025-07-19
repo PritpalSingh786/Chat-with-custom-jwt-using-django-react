@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     # 'rest_framework_simplejwt',
     'jwtauth',
     'chat',
+    'post'
 ]
 
 # CORS_ALLOW_ALL_ORIGINS = True
