@@ -1,6 +1,6 @@
 # serializers.py
 from rest_framework import serializers
-from .models import Post
+from .models import Post, Notification
 from jwtauth.models import CustomUser
 
 class PostSerializer(serializers.ModelSerializer):
@@ -23,3 +23,8 @@ class PostSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("You cannot invite more than 5 users.")
 
         return value
+
+class NotificationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Notification
+        fields = ['id', 'notifyTextMessage', 'invitedUsersIds', 'createdAt', 'updatedAt']
