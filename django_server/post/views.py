@@ -6,6 +6,8 @@ from .serializers import PostSerializer, NotificationSerializer
 from rest_framework.permissions import IsAuthenticated
 from post.consumers import NotificationConsumer
 from .models import Notification
+from django.core.mail import send_mail
+from jwtauth.models import CustomUser
 
 class PostCreateView(APIView):
     permission_classes = [IsAuthenticated]
@@ -19,7 +21,16 @@ class PostCreateView(APIView):
 
             notify_text = f"{request.user.userId} invited you to '{post.postTitle}'"
             NotificationConsumer.notify_and_save(request.user.id, invited_user_ids, notify_text)
-
+            subject = 'Regarding post invitation'
+            # Fetch email addresses of all invited users
+            invited_emails = CustomUser.objects.filter(id__in=invited_user_ids).values_list('email', flat=True)
+            send_mail(
+                subject,
+                notify_text,
+                'singhpritpal225@gmail.com',  # From email
+                list(invited_emails),             # To email
+                fail_silently=False,
+            )
             return Response({"message": "Post created successfully", "postId": post.id}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

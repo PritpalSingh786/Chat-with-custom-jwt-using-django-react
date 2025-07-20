@@ -11,7 +11,13 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
-from datetime import timedelta
+# from datetime import timedelta
+
+from dotenv import load_dotenv
+import os
+load_dotenv()  # Loads the .env file
+
+# os.getenv('anyvalue')
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -176,6 +182,16 @@ REST_FRAMEWORK = {
 #     'AUTH_HEADER_TYPES': ('Bearer',),
 #     'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
 # }
+
+# settings.py
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')  # Use app password if 2FA enabled
+
 
 AUTH_USER_MODEL = 'jwtauth.CustomUser'
 
