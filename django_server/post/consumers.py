@@ -26,7 +26,7 @@ class NotificationConsumer(AsyncWebsocketConsumer):
         }))
 
     @classmethod
-    def notify_and_save(cls, sender_user_id, invited_user_ids, message):
+    def notify_and_save(cls, invited_user_ids, message):
         users = CustomUser.objects.filter(id__in=invited_user_ids)
 
         # Save notification

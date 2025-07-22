@@ -26,7 +26,7 @@ class PostCreateView(APIView):
                     notify_text = f"{request.user.userId} invited you to '{post.postTitle}'"
                     
                     # Notify and save notification
-                    NotificationConsumer.notify_and_save(request.user.id, invited_user_ids, notify_text)
+                    NotificationConsumer.notify_and_save(invited_user_ids, notify_text)
 
                     # Get email addresses of invited users
                     invited_emails = CustomUser.objects.filter(id__in=invited_user_ids).values_list('email', flat=True)
