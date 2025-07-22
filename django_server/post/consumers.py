@@ -20,11 +20,6 @@ class NotificationConsumer(AsyncWebsocketConsumer):
         if hasattr(self, 'group_name'):
             await self.channel_layer.group_discard(self.group_name, self.channel_name)
 
-    async def send_notification(self, event):
-        await self.send(text_data=json.dumps({
-            'message': event['message']
-        }))
-
     @classmethod
     def notify_and_save(cls, invited_user_ids, message):
         users = CustomUser.objects.filter(id__in=invited_user_ids)
@@ -44,4 +39,9 @@ class NotificationConsumer(AsyncWebsocketConsumer):
                     "message": message
                 }
             )
+
+    async def send_notification(self, event):
+        await self.send(text_data=json.dumps({
+            'message': event['message']
+        }))
 
