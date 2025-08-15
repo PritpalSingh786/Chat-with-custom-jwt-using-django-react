@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from .serializers import PostSerializer, NotificationSerializer
 from rest_framework.permissions import IsAuthenticated
-from post.consumers import NotificationConsumer
+from sockets.consumers import CommonConsumer
 from .models import Notification
 from django.core.mail import send_mail
 from jwtauth.models import CustomUser
@@ -26,7 +26,7 @@ class PostCreateView(APIView):
                     notify_text = f"{request.user.userId} invited you to '{post.postTitle}'"
                     
                     # Notify and save notification
-                    NotificationConsumer.notify_and_save(invited_user_ids, notify_text)
+                    CommonConsumer.notify_and_save(invited_user_ids, notify_text)
 
                     # Get email addresses of invited users
                     invited_emails = CustomUser.objects.filter(id__in=invited_user_ids).values_list('email', flat=True)
