@@ -1,0 +1,86 @@
+.chatpage-container {
+  max-width: 400px;
+  margin: 40px 20px;
+  padding: 12px;          /* reduce padding */
+  background-color: #f9fafb;
+  border-radius: 8px;
+  box-shadow: 0 3px 6px rgb(0 0 0 / 0.1);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #333;
+}
+
+/* Headings with less margin */
+.chatpage-container h2 {
+  margin-bottom: 6px;     /* less bottom margin */
+  font-weight: 700;
+  font-size: 1.3rem;      /* slightly smaller */
+  color: #222;
+}
+
+.chatpage-container h3 {
+  margin: 12px 0 6px 0;   /* less margin */
+  font-weight: 600;
+  font-size: 1rem;
+  border-bottom: 2px solid #4f46e5;
+  padding-bottom: 3px;
+}
+
+/* Users List */
+.users-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.users-list li {
+  padding: 6px 10px;      /* smaller padding */
+  background-color: white;
+  margin-bottom: 5px;     /* tighter margin */
+  border-radius: 5px;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.1);
+  transition: background-color 0.3s ease;
+  cursor: default;
+  font-size: 0.85rem;     /* smaller font */
+  line-height: 1.2;       /* tighter line height */
+}
+
+.users-list li:hover {
+  background-color: #eef2ff;
+}
+
+/* Pagination Controls */
+.pagination-controls {
+  margin-top: 12px;       /* less top margin */
+  display: flex;
+  gap: 10px;
+}
+
+.pagination-controls button {
+  padding: 6px 12px;      /* smaller padding */
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: white;
+  background-color: #4f46e5;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  min-width: 80px;
+}
+
+.pagination-controls button:disabled {
+  background-color: #a5b4fc;
+  cursor: not-allowed;
+}
+
+.pagination-controls button:not(:disabled):hover {
+  background-color: #4338ca;
+}
+
+.pagination-controls span {
+  align-self: center;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #555;
+  padding-top: 5px;
+}

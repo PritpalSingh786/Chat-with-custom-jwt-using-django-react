@@ -1,0 +1,122 @@
+.userchat-container {
+  width: 400px;
+  margin: 20px auto;
+  border: 1px solid #ddd;
+  padding: 15px;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  height: 80vh;
+  background-color: #fff;
+}
+
+.messages-section {
+  flex-grow: 1;
+  border: 1px solid #ccc;
+  padding: 10px;
+  overflow-y: auto;
+  background: #fafafa;
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+}
+
+.no-messages {
+  text-align: center;
+  color: #999;
+  margin-top: 20px;
+}
+
+.message-group {
+  margin-bottom: 12px;
+  display: flex;
+  flex-direction: column;
+}
+
+.message-group.sent {
+  align-items: flex-end;
+}
+
+.message-group.received {
+  align-items: flex-start;
+}
+
+.message-bubble {
+  max-width: 70%;
+  padding: 8px 12px;
+  border-radius: 18px;
+  font-size: 14px;
+  margin-bottom: 2px;
+  position: relative;
+  word-wrap: break-word;
+}
+
+.message-bubble.sent {
+  background-color: #dcf8c6;
+  border-bottom-right-radius: 4px;
+}
+
+.message-bubble.sent:last-child {
+  border-bottom-right-radius: 18px;
+}
+
+.message-bubble.received {
+  background-color: #fff;
+  border: 1px solid #e5e5ea;
+  border-bottom-left-radius: 4px;
+}
+
+.message-bubble.received:last-child {
+  border-bottom-left-radius: 18px;
+}
+
+.message-sender {
+  font-size: 12px;
+  font-weight: 500;
+  color: #555;
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.message-heading-time {
+  font-size: 11px;
+  color: #999;
+}
+
+.message-text {
+  margin-right: 8px;
+}
+
+.send-message-section {
+  display: flex;
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid #eee;
+}
+
+.send-message-section input {
+  flex-grow: 1;
+  padding: 8px 12px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 20px;
+  outline: none;
+}
+
+.send-message-section button {
+  padding: 8px 16px;
+  font-size: 14px;
+  cursor: pointer;
+  background-color: #007aff;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  transition: background-color 0.2s;
+}
+
+.send-message-section button:hover {
+  background-color: #0062cc;
+}

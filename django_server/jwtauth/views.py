@@ -14,16 +14,23 @@ import datetime
 # from rest_framework_simplejwt.tokens import RefreshToken
 
 class SignupView(APIView):
-    def post(self, request):
+      def post(self, request):
         serializer = UserSignupSerializer(data=request.data)
+
         if serializer.is_valid():
-            if CustomUser.objects.filter(userId=serializer.validated_data['userId']).exists():
-                return Response({"message": "UserId already taken"}, status=400)
-            if CustomUser.objects.filter(email=serializer.validated_data['email']).exists():
-                return Response({"message": "Email already taken"}, status=400)
-            serializer.save(password=make_password(serializer.validated_data['password']))
-            return Response({"message": "User registered successfully"}, status=201)
-        return Response(serializer.errors, status=400)
+            serializer.save(
+                password=make_password(serializer.validated_data["password"])
+            )
+            return Response(
+                {"message": "User registered successfully"},
+                status=201
+            )
+
+        # 🔴 Return serializer errors directly
+        return Response(
+            serializer.errors,
+            status=400
+        )
 
 class LoginView(APIView):
     def post(self, request):
@@ -68,9 +75,10 @@ class LoginView(APIView):
             return Response({"message": "User not found"}, status=status.HTTP_400_BAD_REQUEST)
 
 class LogoutView(APIView):
+    permission_classes = [IsAuthenticated]
     def post(self, request):
-        # userId = request.data.get("userId")
-        userId = request.query_params.get("userId") 
+        userId = request.data.get("userId")
+        # userId = request.query_params.get("userId") 
         print(userId,"userId")
         try:
             user = CustomUser.objects.get(userId=userId)
