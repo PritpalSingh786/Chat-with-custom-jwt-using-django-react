@@ -17,6 +17,7 @@ class CommonConsumer(AsyncWebsocketConsumer):
         await self.accept()
 
     async def disconnect(self, close_code):
+        print("Disconnected:", close_code)
         await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
     
     # Receiving frontend values of chat 
@@ -26,6 +27,7 @@ class CommonConsumer(AsyncWebsocketConsumer):
         receiver_id = data['receiverId']
         message = data['message']
         timestamp = datetime.now().isoformat()
+        print(data,"dataaaaaaaaaaaa")
 
         await self.save_message(sender_id, receiver_id, message)
 

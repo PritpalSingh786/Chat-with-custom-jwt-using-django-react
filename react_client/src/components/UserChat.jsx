@@ -1,15 +1,13 @@
-// src/components/UserChat.jsx
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
-import io from "socket.io-client";
-import "./UserChat.css";
-import { useSelector, useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { fetchMessages, addMessage } from "../features/messagesSlice";
 import { setCurrentChatUser } from "../features/usersSlice";
+import "./UserChat.css";
 
-// Example: create an API fetch for single user
+/* ---------------- API to fetch single user (fallback) ---------------- */
 const fetchSingleUser = async (id, token) => {
-  const res = await fetch(`http://localhost:8000/users/${id}`, {
+  const res = await fetch(`http://localhost:8000/users/${id}/`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -18,154 +16,173 @@ const fetchSingleUser = async (id, token) => {
   return res.json();
 };
 
-const SOCKET_SERVER_URL = "http://localhost:8000";
+const WS_BASE_URL = "ws://localhost:8000/ws/commonsocket";
 
 function UserChat() {
-  const { userId } = useParams();
+  const { userId } = useParams(); // receiverId
   const dispatch = useDispatch();
 
+  /* ---------------- Redux State ---------------- */
   const loggedInUserId = useSelector((state) => state.auth.user?.id);
   const token = useSelector((state) => state.auth.token);
+
   const userList = useSelector((state) => state.users.list);
-  const currentChatUser = useSelector((state) => state.users.currentChatUser);
+  const currentChatUser = useSelector(
+    (state) => state.users.currentChatUser
+  );
+
   const messages = useSelector((state) => state.messages.list);
   const loading = useSelector((state) => state.messages.loading);
 
+  /* ---------------- Local State ---------------- */
   const [message, setMessage] = useState("");
-  const [socket, setSocket] = useState(null);
+  const socketRef = useRef(null);
+  const messagesEndRef = useRef(null);
 
-  // If currentChatUser is not in Redux, try to find from list
-  let chatUser = currentChatUser || userList.find(u => String(u.id) === String(userId));
+  /* ---------------- Find chat user ---------------- */
+  let chatUser =
+    currentChatUser ||
+    userList.find((u) => String(u.id) === String(userId));
 
-  // If still not found, fetch from API
+  /* ---------------- Fetch chat user if missing ---------------- */
   useEffect(() => {
     if (!chatUser && userId && token) {
       fetchSingleUser(userId, token)
-        .then(data => {
-          dispatch(setCurrentChatUser(data));
-        })
-        .catch(err => console.error(err));
+        .then((data) => dispatch(setCurrentChatUser(data)))
+        .catch(console.error);
     }
   }, [chatUser, userId, token, dispatch]);
 
-  // Fetch chat history when opening chat
+  /* ---------------- Fetch chat history ---------------- */
   useEffect(() => {
     if (loggedInUserId && userId && token) {
-      dispatch(fetchMessages({
-        senderId: loggedInUserId,
-        receiverId: userId,
-        token
-      }));
+      dispatch(
+        fetchMessages({
+          senderId: loggedInUserId,
+          receiverId: userId,
+          token,
+        })
+      );
     }
   }, [dispatch, loggedInUserId, userId, token]);
 
-  // Socket connection
+  /* ---------------- WebSocket Connection ---------------- */
   useEffect(() => {
-    if (!token || !loggedInUserId) return;
+    if (!loggedInUserId) return;
 
-    const newSocket = io(SOCKET_SERVER_URL, {
-      query: { userId: loggedInUserId },
-      extraHeaders: {
-        Authorization: `Bearer ${token}`
-      }
-    });
-    setSocket(newSocket);
+    const socket = new WebSocket(
+      `${WS_BASE_URL}/${loggedInUserId}/`
+    );
 
-    newSocket.emit("register_user", loggedInUserId);
+    socketRef.current = socket;
 
-    return () => {
-      newSocket.disconnect();
+    socket.onopen = () => {
+      console.log("WebSocket connected");
     };
-  }, [loggedInUserId, token]);
 
-  // Listen for incoming messages
-  useEffect(() => {
-    if (!socket) return;
+    socket.onmessage = (event) => {
+      const data = JSON.parse(event.data);
 
-    socket.on("receive_message", (data) => {
-      if (String(data.sender_id) === String(loggedInUserId)) return;
-      if (
-        (String(data.sender_id) === String(userId) || String(data.receiver_id) === String(userId)) &&
-        (String(data.sender_id) === String(loggedInUserId) || String(data.receiver_id) === String(loggedInUserId))
-      ) {
-        dispatch(addMessage({
+      // accept only current chat messages
+      const isCurrentChat =
+        (String(data.senderId) === String(loggedInUserId) &&
+          String(data.receiverId) === String(userId)) ||
+        (String(data.senderId) === String(userId) &&
+          String(data.receiverId) === String(loggedInUserId));
+
+      if (!isCurrentChat) return;
+
+      dispatch(
+        addMessage({
           text: data.message,
-          from: "other",
-          time: new Date(data.timestamp),
-          senderId: data.sender_id
-        }));
-      }
-    });
-
-    return () => {
-      socket.off("receive_message");
+          from:
+            String(data.senderId) === String(loggedInUserId)
+              ? "me"
+              : "other",
+          time: data.timestamp,
+          senderId: data.senderId,
+        })
+      );
     };
-  }, [socket, loggedInUserId, userId, dispatch]);
 
-  // Auto-scroll to latest message
+    socket.onerror = (err) => {
+      console.error("WebSocket error", err);
+    };
+
+    socket.onclose = () => {
+      console.log("WebSocket disconnected");
+    };
+
+    return () => socket.close();
+  }, [loggedInUserId, userId, dispatch]);
+
+  /* ---------------- Auto Scroll ---------------- */
   useEffect(() => {
-    const container = document.querySelector(".messages-section");
-    if (container) {
-      container.scrollTop = container.scrollHeight;
-    }
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Send message
+  /* ---------------- Send Message ---------------- */
   const handleSend = () => {
-    if (!message.trim() || !socket) return;
+    if (!message.trim() || !socketRef.current) return;
 
-    const timestamp = new Date();
-
-    dispatch(addMessage({
-      text: message,
-      from: "me",
-      time: timestamp,
-      senderId: loggedInUserId
-    }));
-
-    socket.emit("send_message", {
-      sender_id: loggedInUserId,
-      receiver_id: userId,
-      message,
-      timestamp: timestamp.toISOString()
-    });
+    socketRef.current.send(
+      JSON.stringify({
+        senderId: loggedInUserId,
+        receiverId: userId,
+        message,
+      })
+    );
 
     setMessage("");
   };
 
-  const getDisplayName = (senderId) => {
+  /* ---------------- Helpers ---------------- */
+  const formatDateTime = (date) =>
+    new Date(date).toLocaleString();
+
+  const getSenderName = (senderId) => {
     if (String(senderId) === String(loggedInUserId)) return "You";
-    const sender = userList.find(u => String(u.id) === String(senderId)) || currentChatUser;
-    return sender?.userId || "User";
+    return chatUser?.userId || "User";
   };
 
-  const formatDateTime = (date) => {
-    if (!(date instanceof Date)) date = new Date(date);
-    return `${date.toLocaleDateString([], { year: "numeric", month: "short", day: "numeric" })} ${date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
-  };
-
+  /* ---------------- UI ---------------- */
   return (
     <div className="userchat-container">
-      <h2>Chat with {chatUser?.userId || "User"}</h2>
+      <h2>Chat with {chatUser?.userId || userId}</h2>
 
       <div className="messages-section">
         {loading ? (
           <p>Loading messages...</p>
         ) : messages.length === 0 ? (
-          <p className="no-messages">No messages yet. Start the conversation!</p>
+          <p className="no-messages">No messages yet</p>
         ) : (
-          messages.map((msg, idx) => (
-            <div key={idx} className={`message-group ${msg.from === "me" ? "sent" : "received"}`}>
+          messages.map((msg) => (
+            <div
+              key={`${msg.senderId}-${msg.time}`}
+              className={`message-group ${
+                msg.from === "me" ? "sent" : "received"
+              }`}
+            >
               <div className="message-sender">
-                {getDisplayName(msg.senderId)}
-                <span className="message-heading-time">{formatDateTime(msg.time)}</span>
+                {getSenderName(msg.senderId)}
+                <span className="message-time">
+                  {formatDateTime(msg.time)}
+                </span>
               </div>
-              <div className={`message-bubble ${msg.from === "me" ? "sent" : "received"}`}>
-                <span className="message-text">{msg.text}</span>
+
+              <div
+                className={`message-bubble ${
+                  msg.from === "me" ? "sent" : "received"
+                }`}
+              >
+                {msg.text}
               </div>
             </div>
           ))
         )}
+
+        {/* scroll anchor */}
+        <div ref={messagesEndRef} />
       </div>
 
       <div className="send-message-section">
