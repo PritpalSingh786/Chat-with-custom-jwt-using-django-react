@@ -1,4 +1,3 @@
-// src/pages/ChatPage.jsx
 import React, { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { fetchUsers, setCurrentChatUser } from "../features/usersSlice";
@@ -10,8 +9,16 @@ function ChatPage() {
   const navigate = useNavigate();
 
   const { user } = useSelector((state) => state.auth);
-  const { list, loading, error, page, perPage, hasNext, hasPrev, currentChatUser } =
-    useSelector((state) => state.users);
+  const {
+    list,
+    loading,
+    error,
+    page,
+    perPage,
+    hasNext,
+    hasPrev,
+    currentChatUser,
+  } = useSelector((state) => state.users);
 
   useEffect(() => {
     if (!user) {
@@ -36,10 +43,13 @@ function ChatPage() {
   if (!user) return null;
 
   return (
-    <div className="chatpage-container" style={{ display: "flex", gap: "1rem" }}>
-      {/* User List */}
+    <div
+      className="chatpage-container"
+      style={{ display: "flex", gap: "1rem" }}
+    >
+      {/* USERS LIST */}
       <div style={{ flex: "1 1 300px" }}>
-        <h3>Welcome, {user?.userId || "User"}</h3>
+        <h3>Welcome, {user.userId}</h3>
 
         {loading && <p>Loading users...</p>}
         {error && <p style={{ color: "red" }}>{error}</p>}
@@ -57,38 +67,43 @@ function ChatPage() {
           ))}
         </ul>
 
-        <div className="pagination-controls">
-          <button
-            onClick={handlePrev}
-            disabled={!hasPrev}
-            style={{
-              backgroundColor: "#8000ff",
-              color: "white",
-              padding: "6px 12px",
-              border: "none",
-              borderRadius: "4px",
-            }}
-          >
-            ⬅ Previous
-          </button>
-          <span style={{ margin: "0 10px" }}>Page {page}</span>
-          <button
-            onClick={handleNext}
-            disabled={!hasNext}
-            style={{
-              backgroundColor: "#8000ff",
-              color: "white",
-              padding: "6px 12px",
-              border: "none",
-              borderRadius: "4px",
-            }}
-          >
-            Next ➡
-          </button>
-        </div>
+        {/* PAGINATION (HIDDEN IF NOT NEEDED) */}
+        {(hasNext || hasPrev) && (
+          <div className="pagination-controls">
+            <button
+              onClick={handlePrev}
+              disabled={!hasPrev}
+              style={{
+                backgroundColor: "#8000ff",
+                color: "white",
+                padding: "6px 12px",
+                border: "none",
+                borderRadius: "4px",
+              }}
+            >
+              ⬅ Previous
+            </button>
+
+            <span style={{ margin: "0 10px" }}>Page {page}</span>
+
+            <button
+              onClick={handleNext}
+              disabled={!hasNext}
+              style={{
+                backgroundColor: "#8000ff",
+                color: "white",
+                padding: "6px 12px",
+                border: "none",
+                borderRadius: "4px",
+              }}
+            >
+              Next ➡
+            </button>
+          </div>
+        )}
       </div>
 
-      {/* Chat content for selected user */}
+      {/* CHAT AREA */}
       <div
         style={{
           flex: "2 1 600px",

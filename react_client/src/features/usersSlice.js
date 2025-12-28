@@ -54,19 +54,18 @@ const usersSlice = createSlice({
       })
       .addCase(fetchUsers.fulfilled, (state, action) => {
         state.loading = false;
-        state.list = action.payload.users || [];
-        state.total = action.payload.total || 0;
-        state.page = action.payload.page || 1;
-        state.perPage = action.payload.perPage || 10;
-        state.hasNext =
-          action.payload.page * action.payload.perPage <
-          action.payload.total;
-        state.hasPrev = action.payload.page > 1;
+
+        const { users, pagination } = action.payload;
+
+        state.list = users || [];
+        state.total = pagination.total;
+        state.page = pagination.page;
+        state.perPage = pagination.perPage;
+
+        state.hasNext = pagination.page < pagination.totalPages;
+        state.hasPrev = pagination.page > 1;
       })
-      .addCase(fetchUsers.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload || "Failed to fetch users";
-      });
+
   },
 });
 
