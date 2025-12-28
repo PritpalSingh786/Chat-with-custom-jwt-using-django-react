@@ -9,6 +9,7 @@ from .models import Notification
 from django.core.mail import send_mail
 from jwtauth.models import CustomUser
 from django.db import transaction
+
 class PostCreateView(APIView):
     permission_classes = [IsAuthenticated]
 

@@ -2,25 +2,28 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
-// Async thunk to create a post
 export const createPost = createAsyncThunk(
   "posts/createPost",
-  async ({ postTitle, invited_ids }, { rejectWithValue }) => {
+  async ({ postTitle, invitedPostUsers }, { rejectWithValue }) => {
     try {
-      const token = localStorage.getItem("token"); // Assuming you store token here
+      const token = localStorage.getItem("token");
+
       const response = await axios.post(
-        `http://localhost:8000/createPost`,
-        { postTitle, invited_ids },
+        "http://localhost:8000/createPost",
+        {
+          postTitle,
+          invitedPostUsers, // ✅ MATCHES SERIALIZER
+        },
         {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         }
       );
+
       return response.data;
     } catch (err) {
-      // Return error message for rejected action
-      return rejectWithValue(err.response?.data?.detail || err.message);
+      return rejectWithValue(err.response?.data || "Post create failed");
     }
   }
 );
@@ -43,18 +46,14 @@ const postsSlice = createSlice({
     builder
       .addCase(createPost.pending, (state) => {
         state.loading = true;
-        state.error = null;
-        state.success = false;
       })
       .addCase(createPost.fulfilled, (state) => {
         state.loading = false;
-        state.error = null;
         state.success = true;
       })
       .addCase(createPost.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload || "Failed to create post";
-        state.success = false;
+        state.error = action.payload;
       });
   },
 });
