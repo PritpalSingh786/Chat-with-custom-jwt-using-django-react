@@ -1,7 +1,3 @@
-Bhai 👍
-main tumhare **Django + React custom JWT chat app** ke liye ek **clean, professional aur interview-ready README.md** likh raha hoon.
-Tum direct copy-paste kar sakte ho 👇
-
 ---
 
 # 💬 Chat Application with Custom JWT (Django + React)
